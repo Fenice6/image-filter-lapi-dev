@@ -1,6 +1,9 @@
 import express, { Router, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import * as jwt from 'jsonwebtoken';
+import { NextFunction } from 'connect';
+import { config } from './config';
 
 (async () => {
 
@@ -12,6 +15,28 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
+
+function requireAuth(req: Request, res: Response, next: NextFunction) {
+    //return next();
+    if (!req.headers || !req.headers.authorization){
+        return res.status(401).send({ message: 'No authorization headers.' });
+    }
+    
+    //Il JTW è fatto così: "Bearer njenjncjkncjnk" controlla quindi che sia ben formato 
+    const token_bearer = req.headers.authorization.split(' ');
+    if(token_bearer.length != 2){
+        return res.status(401).send({ message: 'Malformed token.' });
+    }
+    
+    const token = token_bearer[1];
+
+    return jwt.verify(token, config.dev.jwt_secret, (err, decoded) => {
+      if (err) {
+        return res.status(500).send({ auth: false, message: 'Failed to authenticate.' });
+      }
+      return next();
+    });
+}
 
   // @TODO1 IMPLEMENT A RESTFUL ENDPOINT
   // GET /filteredimage?image_url={{URL}}
@@ -30,7 +55,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   /**************************************************************************** */
 
   //! END @TODO1
-  app.get( "/filteredimage/", async ( req: Request, res: Response ) => {
+  app.get( "/filteredimage/", requireAuth, async ( req: Request, res: Response ) => {
     let { image_url } = req.query;
 
     if ( !image_url ) {
