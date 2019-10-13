@@ -8842,3 +8842,26 @@ node_modules/lodash.once/LICENSE
 node_modules/lodash.once/package.json
 
 node_modules/lodash.once/README.md
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+.DS_Store
+
+www/Archive.zip
+
+www/config.js
+
+www/config.js.map
+
+www/package.json
+
+www/server.js
+
+www/server.js.map
+
+www/util/util.js
+
+www/util/util.js.map
